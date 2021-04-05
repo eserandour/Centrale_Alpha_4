@@ -17,6 +17,7 @@ void enregistrerFichier()
       numeroMesure = 0;
       // Leds de couleur
       digitalWrite(LED_ROUGE, HIGH); // LED rouge allumée.
+      digitalWrite(LED_JAUNE, LOW);  // LED jaune éteinte.
       digitalWrite(LED_VERTE, LOW);  // LED verte éteinte
     }
     else {
@@ -64,7 +65,7 @@ void enregistrerFichier()
               recording = false;
               // Marqueur de fin d'enregistrement (pour Python)
               Serial.write("\r\n"); // Retour à la ligne + Saut de ligne
-              selectMenu(TAG_MENU_PRINCIPAL);
+              selectMenu(TAG_MENU_ENREGISTREUR);
               break;
             case '#' :
               if (not declencheurExterne) {
@@ -142,7 +143,7 @@ void enregistrerFichier()
             recording = false;
             // Marqueur de fin d'enregistrement (pour Python)
             Serial.write("\r\n"); // Retour à la ligne + Saut de ligne
-            selectMenu(TAG_MENU_PRINCIPAL);
+            selectMenu(TAG_MENU_ENREGISTREUR);
             break;  // On sort de la boucle do...while  
           }
           tempsEcoule = millis() - time;     
@@ -248,6 +249,7 @@ void donneesVersPortSerie()
 void transfererFichier()
 {
   // Leds de couleur
+  digitalWrite(LED_ROUGE, LOW);  // LED rouge éteinte
   digitalWrite(LED_JAUNE, HIGH); // LED jaune allumée
   digitalWrite(LED_VERTE, LOW);  // LED verte éteinte  
   
@@ -278,7 +280,7 @@ void transfererFichier()
     dataFile.close();
     delay(3000); // Le temps que le programme de récupération se ferme
     bipOK();
-    selectMenu(TAG_MENU_PRINCIPAL);
+    selectMenu(TAG_MENU_ENREGISTREUR);
   }
   // If the file didn't open, print an error
   else { 
