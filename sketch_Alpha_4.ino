@@ -4,7 +4,7 @@
    Copyright 2013-2021 - Eric Sérandour
    http://3615.entropie.org
 */
-const String VERSION = "2021.04.05";  // 19 h 18
+const String VERSION = "2021.04.06";  // 01 h 14
 /*   
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -166,6 +166,7 @@ String Heure;
 
 // *** Carte SD
 // On importe la bibliothèque
+#include <SPI.h>
 #include <SD.h>
 // On the Ethernet Shield, CHIP_SELECT (SS) is pin 4. Note that even if it's not
 // used as the SS pin, the hardware SS pin (10 on most Arduino boards,
@@ -183,11 +184,13 @@ const String SEPARATEUR = ";"; // Séparateur de données pour le tableur
 const byte TAG_ECRAN_ACCUEIL = 0;
 const byte TAG_MENU_PRINCIPAL = 1;
 const byte TAG_REGLAGE_HORLOGE = 2;
-const byte TAG_MENU_CADENCE = 3;
-const byte TAG_MENU_MANUEL = 4;
-const byte TAG_MENU_CAPTEURS = 5;
-const byte TAG_ENREGISTRER_FICHIER = 6;
-const byte TAG_TRANSFERER_FICHIER = 7;
+const byte TAG_MENU_ENREGISTREUR = 3;
+const byte TAG_MENU_CADENCE = 4;
+const byte TAG_MENU_MANUEL = 5;
+const byte TAG_MENU_CAPTEURS = 6;
+const byte TAG_ENREGISTRER_FICHIER = 7;
+const byte TAG_TRANSFERER_FICHIER = 8;
+const byte TAG_ENTREES = 9;
 byte ecran = TAG_ECRAN_ACCUEIL;
 int defilement = 0;
 
@@ -394,11 +397,13 @@ void loop()
     case TAG_ECRAN_ACCUEIL: afficherEcranAccueil(); break;
     case TAG_MENU_PRINCIPAL: afficherMenuPrincipal(); break;
     case TAG_REGLAGE_HORLOGE: afficherReglageHorloge(); break;
+    case TAG_MENU_ENREGISTREUR: afficherMenuEnregistreur(); break;
     case TAG_MENU_CADENCE: afficherMenuCadence(); break;
     case TAG_MENU_MANUEL: afficherMenuManuel(); break;
     case TAG_MENU_CAPTEURS: afficherMenuCapteurs(); break;
     case TAG_ENREGISTRER_FICHIER: enregistrerFichier(); break;
     case TAG_TRANSFERER_FICHIER: transfererFichier(); break;
+    case TAG_ENTREES: afficherEntrees(); break;
   }
 }
 
@@ -425,9 +430,9 @@ void afficherEcranAccueil()
   lcd.print("# HORLOGE");
 
   // Leds de couleur
+  digitalWrite(LED_ROUGE, LOW);  // LED rouge éteinte
+  digitalWrite(LED_JAUNE, LOW);  // LED jaune éteinte
   digitalWrite(LED_VERTE, HIGH); // LED verte allumée
-  digitalWrite(LED_JAUNE, LOW);  // LED jaune éteinte.
-  digitalWrite(LED_ROUGE, LOW);  // LED rouge éteinte.
   
   // Gestion du clavier
   switch(keypad.getKey()) {      
@@ -452,23 +457,52 @@ void afficherEcranAccueil()
 void afficherMenuPrincipal()
 {
   // Affichage
-  const byte NB_LIGNES_MENU = 7;
+  const byte NB_LIGNES_MENU = 8;
   String menu[] = {
-  "0: ACCUEIL          ",
-  "1: PARAMETRES       ",
-  "2: ENREGISTRER      ",
-  "3: TRANSFERT -> USB ",
-  "--------------------",
-  "    V." + VERSION,
-  "--------------------"
+    "0: ACCUEIL          ",
+    "1: ENREGISTREUR     ",
+    "2: EA1..3 / EN1..2  ",
+    "#: A PROPOS         ",
+    "--------------------",
+    "    V." + VERSION + "    ",
+    "    ENTROPIE.ORG    ",
+    "--------------------"
   };
   afficheMenu(menu, NB_LIGNES_MENU);
 
   // Leds de couleur
+  digitalWrite(LED_ROUGE, LOW);  // LED rouge éteinte
+  digitalWrite(LED_JAUNE, LOW);  // LED jaune éteinte
   digitalWrite(LED_VERTE, HIGH); // LED verte allumée
-  digitalWrite(LED_JAUNE, LOW);  // LED jaune éteinte.
-  digitalWrite(LED_ROUGE, LOW);  // LED rouge éteinte.
 
+  // Gestion du clavier
+  switch(choixMenu(1)) { // On entre un nombre à 1 chiffre
+    case 0: selectMenu(TAG_ECRAN_ACCUEIL); break;
+    case 1: selectMenu(TAG_MENU_ENREGISTREUR); break;
+    case 2: selectMenu(TAG_ENTREES); break;
+    case TOUCHE_DIESE: defileMenu(NB_LIGNES_MENU); break;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+void afficherMenuEnregistreur()
+{
+  // Affichage
+  const byte NB_LIGNES_MENU = 4;
+  String menu[] = {
+    "0: ACCUEIL          ",
+    "1: PARAMETRES       ",
+    "2: ENREGISTRER      ",
+    "3: TRANSFERT -> USB ",
+  };  
+  afficheMenu(menu, NB_LIGNES_MENU);
+
+  // Leds de couleur
+  digitalWrite(LED_ROUGE, LOW);  // LED rouge éteinte
+  digitalWrite(LED_JAUNE, LOW);  // LED jaune éteinte
+  digitalWrite(LED_VERTE, HIGH); // LED verte allumée
+  
   // Gestion du clavier
   switch(choixMenu(1)) { // On entre un nombre à 1 chiffre
     case 0: selectMenu(TAG_ECRAN_ACCUEIL); break;
@@ -478,10 +512,6 @@ void afficherMenuPrincipal()
     case TOUCHE_DIESE: defileMenu(NB_LIGNES_MENU); break;
   }
 }
-
-//////////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 
@@ -509,7 +539,8 @@ void afficherMenuCadence()
   };  
   afficheMenu(menu, NB_LIGNES_MENU);
   
-  // Leds de couleur  
+  // Leds de couleur
+  digitalWrite(LED_ROUGE, LOW);  // LED rouge éteinte
   digitalWrite(LED_JAUNE, HIGH); // LED jaune allumée
   digitalWrite(LED_VERTE, LOW);  // LED verte éteinte  
   
@@ -517,7 +548,7 @@ void afficherMenuCadence()
   byte choix = choixMenu(1); // On entre un nombre à 1 chiffre
   switch(choix) {
     case TOUCHE_ETOILE: break;
-    case 0: selectMenu(TAG_MENU_PRINCIPAL); break;
+    case 0: selectMenu(TAG_MENU_ENREGISTREUR); break;
     case TOUCHE_DIESE: defileMenu(NB_LIGNES_MENU); break;
     default:
       if (choix <= NB_LIGNES_MENU) {
@@ -564,7 +595,7 @@ void afficherMenuManuel()
   byte choix = choixMenu(1); // On entre un nombre à 1 chiffre
   switch(choix) {
     case TOUCHE_ETOILE: break;
-    case 0: selectMenu(TAG_MENU_PRINCIPAL); break;
+    case 0: selectMenu(TAG_MENU_ENREGISTREUR); break;
     case TOUCHE_DIESE: break;
     default:
       if (choix <= NB_LIGNES_MENU -2 ) {  // Première et dernière lignes vides
@@ -605,10 +636,10 @@ void afficherMenuCapteurs()
   switch(choix) {
     case TOUCHE_ETOILE: 
       if (nbCapteurs > 0) {
-        selectMenu(TAG_MENU_PRINCIPAL); 
+        selectMenu(TAG_MENU_ENREGISTREUR); 
       }
       break;
-    case 0: selectMenu(TAG_MENU_PRINCIPAL); break;
+    case 0: selectMenu(TAG_MENU_ENREGISTREUR); break;
     case TOUCHE_DIESE: defileMenu(NB_LIGNES_MENU); break;
     default :
       if (choix <= NB_LIGNES_MENU) {
@@ -640,3 +671,41 @@ void afficherMenuCapteurs()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
+
+void afficherEntrees()
+{
+  // Leds de couleur
+  digitalWrite(LED_ROUGE, LOW);  // LED rouge éteinte
+  digitalWrite(LED_JAUNE, HIGH); // LED jaune allumée
+  digitalWrite(LED_VERTE, LOW);  // LED verte éteinte
+
+  String liste[NB_ENTREES_MAX];
+  const byte NB_ENTREES_ANALOGIQUES = 3;
+  const byte NB_ENTREES_NUMERIQUES = 2;
+  
+  boolean quitter = false;
+  do {
+    for (int i=0; i<NB_ENTREES_ANALOGIQUES; i++) {
+      dtostrf(analogRead(ENTREE[i]), 4, 0, ligne);
+      liste[i] = "EA" + String(1+i) + ": " + ligne;
+      lcd.setCursor(0,i);
+      lcd.print(liste[i]);
+    }
+    for (int i=0; i<NB_ENTREES_NUMERIQUES; i++) {
+      dtostrf(digitalRead(ENTREE[NB_ENTREES_ANALOGIQUES+i]), 1, 0, ligne);
+      liste[NB_ENTREES_ANALOGIQUES+i] = "EN" + String(1+i) + ": " + ligne;
+      lcd.setCursor(14,i+2);
+      lcd.print(liste[NB_ENTREES_ANALOGIQUES+i]);
+    }
+    
+    for (int i=0; i<100; i++) {
+      delay(1);
+      char key = keypad.getKey();
+      if (key == '0') {
+        quitter = true;
+        break;  
+      }
+    }             
+  } while (quitter == false);
+  selectMenu(TAG_MENU_PRINCIPAL);
+}
