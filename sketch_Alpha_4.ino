@@ -4,7 +4,7 @@
    Copyright 2013-2021 - Eric Sérandour
    http://3615.entropie.org
 */
-const String VERSION = "2021.04.05";  // 18 h 47
+const String VERSION = "2021.04.05";  // 19 h 18
 /*   
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -288,19 +288,19 @@ void lectureCapteurs()
 {
   int j=0;
   for (int i=0; i<nbCapteurs ; i++) {
-    if (adresseCapteur[i] == ENTREE[0]) {       // Entrée blanche
+    if (adresseCapteur[i] == ENTREE[0]) {       // Entrée blanche (analogique)
       mesureBrute[j] = analogRead(ENTREE[0]);
     }
-    else if (adresseCapteur[i] == ENTREE[1]) {  // Entrée bleue
+    else if (adresseCapteur[i] == ENTREE[1]) {  // Entrée bleue (analogique)
       mesureBrute[j] = analogRead(ENTREE[1]);
     }
-    else if (adresseCapteur[i] == ENTREE[2]) {  // Entrée jaune
+    else if (adresseCapteur[i] == ENTREE[2]) {  // Entrée jaune (analogique)
       mesureBrute[j] = analogRead(ENTREE[2]);
     }
-    else if (adresseCapteur[i] == ENTREE[3]) {  // Entrée verte 1
+    else if (adresseCapteur[i] == ENTREE[3]) {  // Entrée verte 1 (numérique)
       mesureBrute[j] = digitalRead(ENTREE[3]);
     }
-    else if (adresseCapteur[i] == ENTREE[4]) {  // Entrée verte 2
+    else if (adresseCapteur[i] == ENTREE[4]) {  // Entrée verte 2 (numérique)
       mesureBrute[j] = digitalRead(ENTREE[4]);
     }
     j++;
@@ -603,7 +603,11 @@ void afficherMenuCapteurs()
   // Gestion du clavier
   byte choix = choixMenu(1); // On entre un nombre à 1 chiffre
   switch(choix) {
-    case TOUCHE_ETOILE: selectMenu(TAG_MENU_PRINCIPAL); break;   
+    case TOUCHE_ETOILE: 
+      if (nbCapteurs > 0) {
+        selectMenu(TAG_MENU_PRINCIPAL); 
+      }
+      break;
     case 0: selectMenu(TAG_MENU_PRINCIPAL); break;
     case TOUCHE_DIESE: defileMenu(NB_LIGNES_MENU); break;
     default :
