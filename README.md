@@ -1,5 +1,5 @@
 # Centrale_Alpha_4
-Centrale d'acquisition de données issues de capteurs (Prototype)<br>
+Centrale d'acquisition de données (Prototype)<br>
 <br>
 sketch_Alpha_4.ino (compile sous Arduino 1.8.13)<br>
 <br>
