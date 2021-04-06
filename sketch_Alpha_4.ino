@@ -4,7 +4,7 @@
    Copyright 2013-2021 - Eric Sérandour
    http://3615.entropie.org
 */
-const String VERSION = "2021.04.06";  // 01 h 14
+const String VERSION = "2021.04.06";  // 17 h 56
 /*   
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -709,3 +709,5 @@ void afficherEntrees()
   } while (quitter == false);
   selectMenu(TAG_MENU_PRINCIPAL);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////
