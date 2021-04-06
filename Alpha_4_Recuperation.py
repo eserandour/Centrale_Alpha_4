@@ -3,7 +3,7 @@
 ########################################################################
 #
 #  Centrale Alpha 4 : Récupération et traitement des données brutes
-#  Version 2021.04.06a
+#  Version 2021.04.06b
 #  Copyright 2019-2021 - Eric Sérandour
 #  http://3615.entropie.org
 #
@@ -410,7 +410,7 @@ def generateurDonnees():
 print ("En attente de données...")
 print ()
 # Indiquer le port sélectionné dans le menu Arduino (Outils >  Port) :
-# Sous Linux : /dev/ttyACM suivi d'un numéro (0,1,...)
+# Sous Linux : /dev/ttyACM ou ou /dev/ttyUSB suivis d'un numéro (0,1,...)
 # Sous Windows : COM suivi d'un numéro (1,2,...)
 PORT = "/dev/ttyACM0"                                                   # A modifier éventuellement
 VITESSE = 9600  # Vitesse en bauds                                      
