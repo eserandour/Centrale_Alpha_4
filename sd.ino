@@ -21,7 +21,7 @@ void enregistrerFichier()
       digitalWrite(LED_VERTE, LOW);  // LED verte éteinte
     }
     else {
-      // LECTURE DES DONNEES
+      // LECTURE + ENVOI DES DONNEES (commun aux modes manuel et automatique)
         time = millis();
         DateHeure = RTC.now();
         formaterDateHeure();
@@ -30,6 +30,8 @@ void enregistrerFichier()
         }
         duree = time - timeOffset;
         lectureCapteurs();
+        donneesVersCarteSD();    // Ecriture sur carte SD
+        donneesVersPortSerie();  // Envoi des données vers le port série
       
       // MODE MANUEL
       if (deltaMesures == MODE_MANUEL) {
@@ -49,10 +51,6 @@ void enregistrerFichier()
           lcd.setCursor(0,3);
           lcd.print("*: STOP");        
         }
-        // Ecriture des données sur la carte SD
-        donneesVersCarteSD();
-        // Envoi des données vers le port série
-        donneesVersPortSerie();
 
         // Gestion de l'attente et du clavier
         boolean attente = true;
@@ -120,11 +118,6 @@ void enregistrerFichier()
         lcd.print(dureeFormatee);
         lcd.setCursor(0,3);
         lcd.print("*: STOP");        
-        
-        // Ecriture des données sur la carte SD
-        donneesVersCarteSD();
-        // Envoi des données vers le port série
-        donneesVersPortSerie();
         
         // Mécanisme de régulation. Gestion du clavier.
         // On regarde où on en est au niveau temps parce qu'une boucle dure ici environ 33 ms
@@ -230,7 +223,6 @@ void donneesVersPortSerie()
     Serial.print(SEPARATEUR);
     Serial.print(mesureBrute[i]);
   }
-
   Serial.println("");
 }
 
