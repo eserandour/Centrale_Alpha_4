@@ -419,7 +419,7 @@ enregistrerDonnees(PORT, VITESSE, FICHIER_CSV)                          # A mett
 print("-----------------------------------------------------------")
 
 # Extraction du fichier CSV
-COLONNE_X = 2                                                           # A modifier éventuellement
+COLONNE_X = 0                                                           # A modifier éventuellement
 COLONNE_Y = 3                                                           # A modifier éventuellement
 x, y = extraireDonnees(FICHIER_CSV, COLONNE_X, COLONNE_Y)
 """afficherDonnees("Données extraites :", x, y)"""
