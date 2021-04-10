@@ -194,7 +194,7 @@ void donneesVersCarteSD()
     dataFile.print(Heure);
     dataFile.print(SEPARATEUR);
     dataFile.print(duree);
-    for (int i=0; i<(nCapteurs); i++) {
+    for (int i=0; i<(nbCapteurs); i++) {
       dataFile.print(SEPARATEUR);
       dataFile.print(mesureBrute[i]);
     }
@@ -219,7 +219,7 @@ void donneesVersPortSerie()
   Serial.print(Heure);
   Serial.print(SEPARATEUR);
   Serial.print(duree);
-  for (int i=0; i<(nCapteurs); i++) {
+  for (int i=0; i<(nbCapteurs); i++) {
     Serial.print(SEPARATEUR);
     Serial.print(mesureBrute[i]);
   }
