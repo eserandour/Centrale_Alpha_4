@@ -29,7 +29,7 @@ void enregistrerFichier()
           timeOffset = time;
         }
         duree = time - timeOffset;
-        lectureCapteurs();
+        lectureCapteurs();       // Lecture des capteurs
         donneesVersCarteSD();    // Ecriture sur carte SD
         donneesVersPortSerie();  // Envoi des données vers le port série
       
@@ -194,7 +194,7 @@ void donneesVersCarteSD()
     dataFile.print(Heure);
     dataFile.print(SEPARATEUR);
     dataFile.print(duree);
-    for (int i=0; i<(nbMesures); i++) {
+    for (int i=0; i<(nCapteurs); i++) {
       dataFile.print(SEPARATEUR);
       dataFile.print(mesureBrute[i]);
     }
@@ -219,7 +219,7 @@ void donneesVersPortSerie()
   Serial.print(Heure);
   Serial.print(SEPARATEUR);
   Serial.print(duree);
-  for (int i=0; i<(nbMesures); i++) {
+  for (int i=0; i<(nCapteurs); i++) {
     Serial.print(SEPARATEUR);
     Serial.print(mesureBrute[i]);
   }
