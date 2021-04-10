@@ -4,7 +4,7 @@
    Copyright 2013-2021 - Eric Sérandour
    http://3615.entropie.org
 */
-const String VERSION = "2021.04.06";  // 17 h 56
+const String VERSION = "2021.04.10";  // 22 h 25
 /*   
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ const String VERSION = "2021.04.06";  // 17 h 56
     Brochage de l'afficheur compatible HD44780 :
     1  : Vss : GND (fil noir)
     2  : Vdd : Power Supply +5V (fil rouge)
-    3  : V0 : Contrast Adjust. Point milieu du potentiomètre (fil gris)
+    3  : V0 : Contrast Adjust. Point milieu du potentiomètre 1kohms (fil gris)
     4  : RS : Register Select Signal. => D2 de l'Arduino (fil bleu)
     5  : R/W : Data Read/Write. Relié à GND (fil noir)
     6  : E : Enable Signal. => D3 de l'Arduino (fil vert)
@@ -266,9 +266,8 @@ const String NOM_MESURE[NB_ENTREES_MAX] = {
 
 // *** Variables
 boolean selectionCapteur[NB_ENTREES_MAX];
-int nbCapteurs;
+int nCapteurs;
 int adresseCapteur[NB_ENTREES_MAX];
-int nbMesures;
 int mesureBrute[NB_ENTREES_MAX];
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -276,7 +275,7 @@ int mesureBrute[NB_ENTREES_MAX];
 void initCapteurs()
 {
   // Initialisation des entrées
-  nbCapteurs = 0;
+  nCapteurs = 0;
   for (int i=0; i<NB_ENTREES_MAX; i++) {
     adresseCapteur[i] = AUCUN_CAPTEUR;
     selectionCapteur[i] = false;
@@ -290,7 +289,7 @@ void initCapteurs()
 void lectureCapteurs()
 {
   int j=0;
-  for (int i=0; i<nbCapteurs ; i++) {
+  for (int i=0; i<nCapteurs ; i++) {
     if (adresseCapteur[i] == ENTREE[0]) {       // Entrée blanche (analogique)
       mesureBrute[j] = analogRead(ENTREE[0]);
     }
@@ -308,7 +307,6 @@ void lectureCapteurs()
     }
     j++;
   }
-  nbMesures=j;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -628,6 +626,9 @@ void afficherMenuCapteurs()
     if (selectionCapteur[i]) {
       menu[i]=menu[i].substring(0,NB_COLONNES_LCD-1)+'*';
     }
+    else {
+      menu[i]=menu[i].substring(0,NB_COLONNES_LCD-1)+' ';
+    }
   }
   afficheMenu(menu, NB_LIGNES_MENU);
   
@@ -635,8 +636,19 @@ void afficherMenuCapteurs()
   byte choix = choixMenu(1); // On entre un nombre à 1 chiffre
   switch(choix) {
     case TOUCHE_ETOILE: 
-      if (nbCapteurs > 0) {
-        selectMenu(TAG_MENU_ENREGISTREUR); 
+      if (nCapteurs > 0) {
+        int j = 0;
+        for (int i=0; i<NB_ENTREES_MAX; i++) {
+          if (selectionCapteur[i]) {
+            adresseCapteur[j] = ENTREE[i];
+            j++;
+            enteteFichier += SEPARATEUR + NOM_MESURE[i];
+          }
+        }
+        selectMenu(TAG_MENU_ENREGISTREUR);
+      }
+      else {
+        bipErreur();
       }
       break;
     case 0: selectMenu(TAG_MENU_ENREGISTREUR); break;
@@ -651,20 +663,14 @@ void afficherMenuCapteurs()
         }
         if ((choix+correction >= defilement+1) 
         && (choix+correction <= defilement+NB_LIGNES_LCD)) {
-          if (selectionCapteur[choix-1] == true) {
-            bipErreur();
+          if (selectionCapteur[choix-1] == false) {
+            nCapteurs++;
           }
           else {
-            selectionCapteur[choix-1] = true;
-            adresseCapteur[nbCapteurs] = ENTREE[choix-1];       
-            int index = 0;
-            for (int i=0; i<choix-1; i++) {
-              index++;
-            }
-            enteteFichier += SEPARATEUR + NOM_MESURE[index];
-            nbCapteurs++;
-            while (keypad.getKey() != NO_KEY); // On boucle tant que la touche pressée n'est pas relachée
+            nCapteurs--;
           }
+          selectionCapteur[choix-1] = !selectionCapteur[choix-1];
+          while (keypad.getKey() != NO_KEY); // On boucle tant que la touche pressée n'est pas relachée
         }        
       }
   }
@@ -682,12 +688,18 @@ void afficherEntrees()
   String liste[NB_ENTREES_MAX];
   const byte NB_ENTREES_ANALOGIQUES = 3;
   const byte NB_ENTREES_NUMERIQUES = 2;
+  int valeurBrute;
+  float tension;
   
   boolean quitter = false;
   do {
     for (int i=0; i<NB_ENTREES_ANALOGIQUES; i++) {
-      dtostrf(analogRead(ENTREE[i]), 4, 0, ligne);
+      valeurBrute = analogRead(ENTREE[i]);
+      tension = (5.0 * valeurBrute) / 1023.0;  // Conversion en Volts
+      dtostrf(valeurBrute, 4, 0, ligne);
       liste[i] = "EA" + String(1+i) + ": " + ligne;
+      dtostrf(tension, 3, 1, ligne);
+      liste[i] = liste[i] + " " + ligne;
       lcd.setCursor(0,i);
       lcd.print(liste[i]);
     }
@@ -705,7 +717,7 @@ void afficherEntrees()
         quitter = true;
         break;  
       }
-    }             
+    }
   } while (quitter == false);
   selectMenu(TAG_MENU_PRINCIPAL);
 }
