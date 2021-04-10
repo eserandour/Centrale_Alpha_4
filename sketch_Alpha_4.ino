@@ -4,7 +4,7 @@
    Copyright 2013-2021 - Eric Sérandour
    http://3615.entropie.org
 */
-const String VERSION = "2021.04.10";  // 22 h 25
+const String VERSION = "2021.04.10";  // 23 h 59
 /*   
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -266,7 +266,7 @@ const String NOM_MESURE[NB_ENTREES_MAX] = {
 
 // *** Variables
 boolean selectionCapteur[NB_ENTREES_MAX];
-int nCapteurs;
+int nbCapteurs;
 int adresseCapteur[NB_ENTREES_MAX];
 int mesureBrute[NB_ENTREES_MAX];
 
@@ -275,7 +275,7 @@ int mesureBrute[NB_ENTREES_MAX];
 void initCapteurs()
 {
   // Initialisation des entrées
-  nCapteurs = 0;
+  nbCapteurs = 0;
   for (int i=0; i<NB_ENTREES_MAX; i++) {
     adresseCapteur[i] = AUCUN_CAPTEUR;
     selectionCapteur[i] = false;
@@ -289,7 +289,7 @@ void initCapteurs()
 void lectureCapteurs()
 {
   int j=0;
-  for (int i=0; i<nCapteurs ; i++) {
+  for (int i=0; i<nbCapteurs ; i++) {
     if (adresseCapteur[i] == ENTREE[0]) {       // Entrée blanche (analogique)
       mesureBrute[j] = analogRead(ENTREE[0]);
     }
@@ -636,7 +636,7 @@ void afficherMenuCapteurs()
   byte choix = choixMenu(1); // On entre un nombre à 1 chiffre
   switch(choix) {
     case TOUCHE_ETOILE: 
-      if (nCapteurs > 0) {
+      if (nbCapteurs > 0) {
         int j = 0;
         for (int i=0; i<NB_ENTREES_MAX; i++) {
           if (selectionCapteur[i]) {
@@ -664,10 +664,10 @@ void afficherMenuCapteurs()
         if ((choix+correction >= defilement+1) 
         && (choix+correction <= defilement+NB_LIGNES_LCD)) {
           if (selectionCapteur[choix-1] == false) {
-            nCapteurs++;
+            nbCapteurs++;
           }
           else {
-            nCapteurs--;
+            nbCapteurs--;
           }
           selectionCapteur[choix-1] = !selectionCapteur[choix-1];
           while (keypad.getKey() != NO_KEY); // On boucle tant que la touche pressée n'est pas relachée
