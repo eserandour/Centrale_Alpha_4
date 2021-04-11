@@ -285,7 +285,7 @@ def regressionFonction(x, y, regression):
         y2 = y[ecart]
         y3 = y[2*ecart]
         # Valeurs d'initialisation pour la régression
-        if (y2 > y1):
+        if (y3 > y1):
             a = -1
         if (y1 != y2) and (y2 != y3):
             b = numpy.log(numpy.abs((y3-y2)/(y2-y1))) / (x2-x1)
