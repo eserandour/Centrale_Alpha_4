@@ -3,7 +3,7 @@
 ########################################################################
 #
 #  Centrale Alpha 4 : Récupération et traitement des données brutes
-#  Version 2021.04.06b
+#  Version 2021.04.11
 #  Copyright 2019-2021 - Eric Sérandour
 #  http://3615.entropie.org
 #
@@ -285,6 +285,8 @@ def regressionFonction(x, y, regression):
         y2 = y[ecart]
         y3 = y[2*ecart]
         # Valeurs d'initialisation pour la régression
+        if (y2 > y1):
+            a = -1
         if (y1 != y2) and (y2 != y3):
             b = numpy.log(numpy.abs((y3-y2)/(y2-y1))) / (x2-x1)
         p0 = numpy.array([a, b, c])
