@@ -3,7 +3,7 @@
 ########################################################################
 #
 #  Centrale Alpha 4 : Récupération et traitement des données brutes
-#  Version 2021.04.11
+#  Version 2021.04.13
 #  Copyright 2019-2021 - Eric Sérandour
 #  http://3615.entropie.org
 #
@@ -128,8 +128,8 @@ def extraireDonnees(nomFichier, colX, colY):
 
 def selectionnerZoneDonnees(x, y, debut, fin):
     """Sélection d'une zone de données"""
-    x = x[debut:fin]
-    y = y[debut:fin]
+    x = x[debut:fin+1]
+    y = y[debut:fin+1]
     return numpy.array([x,y])
 
 ########################################################################
@@ -149,6 +149,48 @@ def afficherDonnees(message, x, y):
     print("Abscisses :", x)
     print("Ordonnées :", y)
     print("-----------------------------------------------------------")
+
+########################################################################
+
+
+
+
+
+
+########################################################################
+#  CALCUL DE LA TEMPORISATION
+########################################################################
+
+def calculTemporisation(debut, fin):
+    """
+    Dans la centrale Alpha 4, les temporisations possibles sont :
+    manuel,   => On n'en tient pas compte ici
+    100 ms,
+    1 s, 5 s, 15 s,   cad 1000 ms, 5000 ms, 15000 ms
+    1 min, 5 min, 15 min,   cad 60000 ms, 300000 ms, 900000 ms
+    1 h.   cad 3600000 ms
+    """
+    # Extraction du fichier CSV
+    COLONNE_N = 0
+    COLONNE_T = 2
+    n, t = extraireDonnees(FICHIER_CSV, COLONNE_N, COLONNE_T)
+    n, t = selectionnerZoneDonnees(n, t, debut+1, fin)  # debut+1 : On enlève éventuellement la mesure n°0 pour éviter une division par 0
+    tableauTemporisation = numpy.round(t/n)
+    temporisation = round(numpy.mean(tableauTemporisation))  # Moyenne arrondie
+    # La temporisation est en millisecondes
+    if temporisation >= (3600000 * 0.90) :  # On se laisse un grosse marge d'erreur de 10 %
+        temporisation = round(temporisation / 3600000)  # La temporisation est en heures
+        uniteT = "h"
+    elif temporisation >= (60000 * 0.90) :  # On se laisse un grosse marge d'erreur de 10 %
+        temporisation = round(temporisation / 60000)  # La temporisation est en minutes
+        uniteT = "min"
+    elif temporisation >= (1000 * 0.90) :  # On se laisse un grosse marge d'erreur de 10 %
+        temporisation = round(temporisation / 1000)  # La temporisation est en secondes
+        uniteT = "s"
+    else:
+        temporisation = 0.1  # 100 ms = 0.1 s
+        uniteT = "s"
+    return [temporisation, uniteT]
 
 ########################################################################
 
@@ -369,7 +411,6 @@ def afficheEcartTypeErreurY(x, y, yReg):
 
 
 
-
 ########################################################################
 #  GENERATEUR DE DONNEES (POUR LA MISE AU POINT DU PROGRAMME)
 ########################################################################
@@ -412,7 +453,7 @@ def generateurDonnees():
 print ("En attente de données...")
 print ()
 # Indiquer le port sélectionné dans le menu Arduino (Outils >  Port) :
-# Sous Linux : /dev/ttyACM ou ou /dev/ttyUSB suivis d'un numéro (0,1,...)
+# Sous Linux : /dev/ttyACM ou /dev/ttyUSB suivis d'un numéro (0,1,...)
 # Sous Windows : COM suivi d'un numéro (1,2,...)
 PORT = "/dev/ttyACM0"                                                   # A modifier éventuellement
 VITESSE = 9600  # Vitesse en bauds                                      
@@ -432,17 +473,26 @@ x, y = extraireDonnees(FICHIER_CSV, COLONNE_X, COLONNE_Y)
 
 # Sélectionner une zone de données (x, y, ligne début, ligne fin)
 DEBUT = 0
-FIN = numpy.size(x)
+FIN = numpy.size(x) - 1
 x, y = selectionnerZoneDonnees(x, y, DEBUT, FIN)                        # A modifier éventuellement
 """afficherDonnees("Données sélectionnées :", x, y)"""
 
+# Calcul de la temporisation
+MODE_MANUEL = False                                                     # A modifier éventuellement
+temporisation, uniteT  = calculTemporisation(DEBUT, FIN)
+if MODE_MANUEL:
+    temporisation = 1
+    uniteT = "Mode Manuel"
+
 # Conversion des données
-# x : Temps en secondes
-# Pour une temporisation de 100 ms, choisir 0.1 s
-temporisation = 1  # en s, min, ou h                                    # A modifier éventuellement
-x = x * temporisation
+# x : Temps en s, min, ou h
+x = x * temporisation                                                   # A modifier éventuellement
+grandeurX = "Temps"                                                     # A modifier éventuellement
+uniteX = uniteT                                                         # A modifier éventuellement
 # y : Tension en volts
-#y = 5.0 * y / 1023                                                      # A modifier éventuellement
+y = 5.0 * y / 1023                                                      # A modifier éventuellement
+grandeurY = "Tension"                                                   # A modifier éventuellement
+uniteY = "V"                                                            # A modifier éventuellement
 """afficherDonnees("Données converties :", x, y)"""
 
 ########################################################################
@@ -516,8 +566,8 @@ Commentaires
 ########################################################################
 
 plt.title("Titre")                                                      # A modifier (Titre)
-plt.xlabel("Abscisses")                                                 # A modifier (Abscisses)
-plt.ylabel("Ordonnées")                                                 # A modifier (Ordonnées)
+plt.xlabel(grandeurX + " (" + uniteX + ")")  # Abscisses
+plt.ylabel(grandeurY + " (" + uniteY + ")")  # Ordonnées
 
 #plt.plot(x, y, ".r")  # Les points ne sont pas reliés (r : rouge)
 plt.plot(x,y)  # Les points sont reliés
