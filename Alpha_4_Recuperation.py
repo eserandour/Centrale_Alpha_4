@@ -509,6 +509,7 @@ uniteY = "V"                                                            # A modi
 ########################################################################
 """
 Choix du type de régression (définies plus haut) :
+    O : ne pas faire de régression
     1 : lineaire : y = a.x + b
     2 : quadratique : y = a.x^2 + b.x + c
     3 : cubique : y = a.x^3 + b.x^2 + c.x + d
@@ -520,22 +521,23 @@ Choix du type de régression (définies plus haut) :
 """
 choix = 1                                                               # A modifier éventuellement
  
-regressionChoisie = choixRegression(choix)
-try:
-    coefReg, coefCov, xReg, yReg = regressionFonction(x, y, regressionChoisie)
-    afficheCoefReg(coefReg, coefCov)
-    afficheEcartTypeErreurY(x, y, yReg)
-    print("-----------------------------------------------------------")
-    # Calcul de la période et de la fréquence pour une régression trigonométrique
-    # Attention : La base de temps doit être en secondes !
-    if regressionChoisie == trigonometrique:
-        periode = (2 * numpy.pi) / coefReg[1]
-        frequence = coefReg[1] / (2 * numpy.pi)
-        print("Période   =", periode, "s")
-        print("Fréquence =", frequence, "Hz")
+if (choix > 0):
+    regressionChoisie = choixRegression(choix)
+    try:
+        coefReg, coefCov, xReg, yReg = regressionFonction(x, y, regressionChoisie)
+        afficheCoefReg(coefReg, coefCov)
+        afficheEcartTypeErreurY(x, y, yReg)
         print("-----------------------------------------------------------")
-except:
-    pass
+        # Calcul de la période et de la fréquence pour une régression trigonométrique
+        # Attention : La base de temps doit être en secondes !
+        if regressionChoisie == trigonometrique:
+            periode = (2 * numpy.pi) / coefReg[1]
+            frequence = coefReg[1] / (2 * numpy.pi)
+            print("Période   =", periode, "s")
+            print("Fréquence =", frequence, "Hz")
+            print("-----------------------------------------------------------")
+    except:
+        pass
 
 ########################################################################
 
